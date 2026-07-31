@@ -406,4 +406,4 @@ def join(userName):
 
 
 if __name__ == '__main__':
-    socketio.run(app, port=15672, allow_unsafe_werkzeug=True)
+    socketio.run(app, port=15672, allow_unsafe_werkzeug=True,debug=False)
