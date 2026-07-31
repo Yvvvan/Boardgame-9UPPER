@@ -18,73 +18,161 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-utilities.rtl.css') }}">
 
     <style>
-        body{
-            margin: 0;
-            padding: 10px;
-            font-family: Arial, sans-serif;
-        }
-        .bottom-spacing {
-            padding-bottom: 60px; /* 根据需要调整值 */
-        }
-
-        .bottom-spacing-2 {
-            padding-bottom: 152px; /* 根据需要调整值 */
+        :root {
+            --ink: #211a16;
+            --panel: rgba(255, 250, 241, 0.94);
+            --line: rgba(33, 26, 22, 0.12);
+            --amber: #f8bd2a;
+            --orange: #ef6f2e;
+            --red: #d7372f;
+            --teal: #1f9d8a;
+            --shadow: 0 18px 50px rgba(49, 28, 7, 0.22);
         }
 
-        .colmd8 {
-            width: 80%
+        * {
+            box-sizing: border-box;
         }
 
-        /* 创建斜着的彩条滚动背景 */
+        html,
         body {
-            background: linear-gradient(to bottom right,
-                #ffcd39, #ffcd39,#fd7e14,#ffcd39 ,#ffcd39 ,#ffcd39,#fd7e14,#ffcd39,#ffcd39 ,#ffcd39,#ffcd39);
-            background-size: 500% 500%; /* 设置背景尺寸为原始尺寸的三倍 */
-            animation: dualColorScroll 3s linear infinite; /* 使用动画来实现滚动效果 */
+            min-height: 100%;
         }
 
-        /* 设置动画关键帧 */
-        @keyframes dualColorScroll {
-            0% {
-                background-position: 0% 0%; /* 开始位置 */
-            }
-            100% {
-                background-position: 50% 50%; /* 结束位置 */
-            }
+        body {
+            margin: 0;
+            padding: 88px 14px 218px;
+            color: var(--ink);
+            font-family: Arial, "Microsoft YaHei", sans-serif;
+            background:
+                radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.58), transparent 24%),
+                linear-gradient(135deg, #ffd861 0%, #f79737 42%, #e34f3f 100%);
+            background-attachment: fixed;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+                linear-gradient(0deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.08));
+        }
+
+        .app-nav {
+            padding: 10px 0;
+            background: rgba(28, 22, 19, 0.92) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.13);
+            box-shadow: 0 10px 28px rgba(33, 26, 22, 0.22);
+        }
+
+        .nav-shell {
+            gap: 8px;
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-right: auto;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+
+        .version-tag {
+            color: #ffd861;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .nav-action {
+            min-width: 46px;
+            min-height: 34px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .player-pill {
+            min-width: 74px;
+            margin: 0;
+            padding: 5px 8px;
+            color: #fff;
+            font-size: 11px;
+            line-height: 1.1;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .stage {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            min-height: calc(100vh - 306px);
+        }
+
+        .role-stage {
+            width: min(420px, 88vw);
+            margin: 8px auto 0;
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.48);
+            border-radius: 8px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 249, 235, 0.35));
+            box-shadow: var(--shadow);
+        }
+
+        .role-card-image {
+            display: block;
+            width: 100%;
+            max-height: 52vh;
+            object-fit: contain;
+            border-radius: 8px !important;
+            filter: drop-shadow(0 14px 18px rgba(33, 26, 22, 0.16));
+        }
+
+        .img-fluid2 {
+            display: none;
+            position: fixed;
+            top: 48%;
+            left: 50%;
+            z-index: 20;
+            width: min(92vw, 620px);
+            aspect-ratio: 16 / 10;
+            transform: translate(-50%, -50%);
+            perspective: 1100px;
         }
 
         .animate-in {
-            animation: slide-in 1s ease-in-out forwards;
+            animation: cardEnter 0.34s ease-out forwards;
         }
 
-         .img-fluid2 {
-            display: none; /* 默认隐藏 */
-            position: fixed; /* 固定在屏幕上 */
-            top: 25vh; /* 初始位置：垂直居中 */
-            left: -100%; /* 初始位置：屏幕左侧外 */
-            animation: slideIn 0.5s forwards; /* 动画效果 */
-        }
-
-        @keyframes slideIn {
-            0% {
-                left: -800%; /* 起始位置 */
+        @keyframes cardEnter {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -42%) scale(0.96);
             }
-            100% {
-                    left: 2vw; /* 终点位置 */
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
             }
         }
 
         .gamecard {
-            width: 95vw;
-            position: absolute;
-            bottom: 50vh;
-            left: 2vw;
+            cursor: pointer;
             transform-style: preserve-3d;
-            transition: transform 0.8s;
+            transition: transform 0.55s ease;
         }
 
         .gamecard.flipped {
-            transform: rotateY(180deg);
+            transform: translate(-50%, -50%) rotateY(180deg);
         }
 
         .front,
@@ -96,30 +184,162 @@
             backface-visibility: hidden;
         }
 
+        .front img,
+        .back img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain;
+            border-radius: 8px !important;
+            box-shadow: var(--shadow);
+        }
+
         .back {
             transform: rotateY(180deg);
         }
 
+        .control-button {
+            z-index: 35;
+            gap: 8px;
+            width: min(620px, calc(100vw - 28px));
+            margin: 0 auto 112px;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .control-button .btn,
+        .composer .btn,
+        .modal .btn {
+            min-height: 42px;
+            border-radius: 8px;
+            font-weight: 800;
+        }
+
+        .control-button .btn {
+            flex: 1 1 0;
+            min-width: 0;
+            padding-right: 8px;
+            padding-left: 8px;
+        }
+
+        .bottom-spacing,
+        .bottom-spacing-2 {
+            padding-bottom: 0;
+        }
+
+        .message-dock {
+            z-index: 34;
+            margin-bottom: 62px;
+        }
+
+        .composer-dock {
+            z-index: 36;
+            margin-bottom: 12px;
+        }
+
+        .surface {
+            width: min(620px, calc(100vw - 28px));
+        }
+
+        #systemMessages {
+            min-height: 88px;
+            max-height: 136px;
+            color: #2d241f;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: 0 12px 34px rgba(49, 28, 7, 0.18);
+            resize: none;
+        }
+
+        .composer {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .composer input {
+            min-height: 44px;
+            border-radius: 8px;
+        }
+
+        .composer .btn {
+            min-width: 86px;
+        }
+
+        .modal-content {
+            border: 0;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-header {
+            color: #fff;
+            background: #211a16;
+            border-bottom: 0;
+        }
+
+        .modal-body {
+            line-height: 1.72;
+        }
+
+        .modal-body img {
+            border-radius: 8px !important;
+        }
+
         .hided {
-            display: none!important;
+            display: none !important;
+        }
+
+        @media (max-width: 430px) {
+            body {
+                padding-right: 10px;
+                padding-left: 10px;
+            }
+
+            .brand-title {
+                font-size: 16px;
+            }
+
+            .nav-action {
+                min-width: 40px;
+                padding-right: 8px;
+                padding-left: 8px;
+                font-size: 12px;
+            }
+
+            .player-pill {
+                min-width: 66px;
+                font-size: 10px;
+            }
+
+            .control-button {
+                margin-bottom: 118px;
+            }
         }
 
     </style>
 </head>
-<body style="background-color: #9eeaf9" >
+<body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-        <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top app-nav">
+        <div class="container nav-shell">
             <!-- 网站名称 -->
-            <h1 class="navbar-brand mb-0">瞎掰王 <span style="font-size: 10px">v1.2.1</span></h1>
+            <h1 class="navbar-brand mb-0 brand-title">瞎掰王 <span class="version-tag">v1.2.1</span></h1>
 
             <!-- 信息小按钮 -->
-            <button class="btn btn-outline-light" type="button" data-bs-toggle="modal" data-bs-target="#infoModal" style="font-size: xx-small">说明</button>
-            <button class="btn btn-outline-light" type="button" data-bs-toggle="modal" data-bs-target="#ruleModal" style="font-size: xx-small">规则</button>
-            <button class="btn btn-outline-light hided" type="button" data-bs-toggle="modal" data-bs-target="#setModal" style="font-size: xx-small" id="setButton">设定</button>
+            <button class="btn btn-outline-light nav-action" type="button" data-bs-toggle="modal" data-bs-target="#infoModal">说明</button>
+            <button class="btn btn-outline-light nav-action" type="button" data-bs-toggle="modal" data-bs-target="#ruleModal">规则</button>
+            <button class="btn btn-warning nav-action hided" type="button" data-bs-toggle="modal" data-bs-target="#setModal" id="setButton">设定</button>
 
             <!-- 在线人数 -->
-            <p class="text-right mb-0" style="font-size: 10px; color: white">在线人数: <br><span id="playerNum">0/0/0</span></p>
+            <p class="player-pill">在线人数<br><span id="playerNum">0/0/0</span></p>
         </div>
     </nav>
 
@@ -236,11 +456,13 @@
         </div>
       </div>
 
-    <div class="d-flex justify-content-center mt-5 ">
-        <img src="{{ url_for('static', filename='role/a_placeholder.png') }}" class="img-fluid" alt="Responsive image" style="height: 50vh; width: auto; border-radius: 30px; transform: scaleX(-1)">
-    </div>
+    <main class="stage">
+        <div class="role-stage">
+            <img src="{{ url_for('static', filename='role/a_placeholder.png') }}" class="img-fluid role-card-image" alt="Responsive image" style="transform: scaleX(-1)">
+        </div>
+    </main>
 
-    <div class="d-flex justify-content-center mt-5 card-entry" id="card-container">
+    <div class="card-entry" id="card-container">
         <div class="gamecard img-fluid2" id="card">
             <div class="front">
                 <img id="frontimg" src="{{ url_for('static', filename='image/a_example_1_1.png') }}" alt="Front Image" style="height: auto; width: 95vw; border-radius: 30px;">
@@ -252,27 +474,22 @@
     </div>
 
     <!-- 开始游戏 结束游戏按钮 -->
-    <div class="fixed-bottom d-flex justify-content-center bottom-spacing-2 control-button hided" id="control-button">
+    <div class="fixed-bottom d-flex justify-content-center control-button hided" id="control-button">
         <button class="btn btn-primary" onclick="startGame()" id="startButton">开始游戏</button>
-
-        <p style="width: 10px;"></p>
         <button class="btn btn-success" onclick="countDown()" id="countdownButton">发牌开始</button>
-
-        <p style="width: 10px;"></p>
         <button class="btn btn-danger" onclick="endGame()" id="endButton">结束游戏</button>
     </div>
 
     <!-- 系统消息 -->
-    <div class="fixed-bottom d-flex justify-content-center bottom-spacing ">
-        <textarea id="systemMessages" class="form-control colmd8" rows="3" readonly style="margin-left: 25px; margin-right: 25px"></textarea>
+    <div class="fixed-bottom d-flex justify-content-center message-dock">
+        <textarea id="systemMessages" class="form-control surface" rows="3" readonly></textarea>
     </div>
 
     <!-- 输入框和发送按钮 -->
-    <div class="fixed-bottom mb-3 d-flex justify-content-center">
-        <div class="colmd8 d-flex">
+    <div class="fixed-bottom d-flex justify-content-center composer-dock">
+        <div class="surface composer">
             <input id="messageInput" type="text" class="form-control" placeholder="请输入用户名...">
-            <p style="width: 10px;"></p>
-            <button class="btn btn-primary" onclick="sendMessage()" style="min-width: 100px">发送</button>
+            <button class="btn btn-primary" onclick="sendMessage()">发送</button>
         </div>
     </div>
 
