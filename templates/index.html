@@ -300,8 +300,6 @@
         // });
 
         var socket = io.connect('//' + document.domain + ':' + location.port);
-        socket.emit('message_from_client','!!reconnect');
-        socket.emit('message_from_client','!!reconnect');
 
         socket.on('connect', function() {
             console.log('Connected to the server');
@@ -413,23 +411,26 @@
             }
 
             if (type2 != null) {
-                countDown_();
-                var systemMessagesTextarea = document.getElementById('systemMessages');
-                systemMessagesTextarea.value += '\n重新加入时倒计时有错误，请以其他玩家为准';
-                systemMessagesTextarea.scrollTop = systemMessagesTextarea.scrollHeight;
+                if (data.remaining != null && Number(data.remaining) > 0) {
+                    countDown_(Number(data.remaining));
+                    var systemMessagesTextarea = document.getElementById('systemMessages');
+                    systemMessagesTextarea.value += '\n重新加入，剩余倒计时约 ' + Number(data.remaining) + ' 秒';
+                    systemMessagesTextarea.scrollTop = systemMessagesTextarea.scrollHeight;
 
-                // 禁用countdownButton, startButton, endButton
-                // 在countDown_中有延迟的开放设置
-                document.getElementById('countdownButton').disabled = true;
-                document.getElementById('startButton').disabled = true;
-                document.getElementById('endButton').disabled = true;
+                    // 禁用countdownButton, startButton, endButton
+                    // 在countDown_中有延迟的开放设置
+                    document.getElementById('countdownButton').disabled = true;
+                    document.getElementById('startButton').disabled = true;
+                    document.getElementById('endButton').disabled = true;
+                }
             }
 
             // smart 可以点击倒计时
             if (type == 'countdown') {
-                countDown_();
+                var remaining = data.remaining != null ? Number(data.remaining) : countdownsecond;
+                countDown_(remaining);
                 var systemMessagesTextarea = document.getElementById('systemMessages');
-                systemMessagesTextarea.value += '\n... 倒计时 ' + countdownsecond + ' 秒' ;
+                systemMessagesTextarea.value += '\n... 倒计时 ' + remaining + ' 秒' ;
                 systemMessagesTextarea.scrollTop = systemMessagesTextarea.scrollHeight;
 
                 // 禁用countdownButton, startButton, endButton
@@ -498,8 +499,22 @@
             socket.emit('message_from_client','!!countdown');
         }
 
-        function countDown_() {
-            setTimeout(function() {
+        function clearCountDowns() {
+            for (var i = 0; i < countDowns.length; i++) {
+                clearTimeout(countDowns[i]);
+            }
+            countDowns = [];
+        }
+
+        function countDown_(remainingSeconds) {
+            clearCountDowns();
+            var duration = Number(remainingSeconds);
+            if (!Number.isFinite(duration) || duration <= 0) {
+                duration = countdownsecond;
+            }
+            duration = Math.max(1, Math.floor(duration));
+
+            var showTimer = setTimeout(function() {
                 var imgElement2 = document.querySelector('.img-fluid2');
                 imgElement2.style.display = 'block'; // 显示第二张图片
                 imgElement2.classList.add('animate-in');
@@ -507,16 +522,18 @@
                 document.getElementById('countdownButton').disabled = true;
                 document.getElementById('endButton').disabled = true;
             }, 1000);
+            countDowns.push(showTimer);
             
             var systemMessagesTextarea = document.getElementById('systemMessages');
 
             // 在9秒后每一秒发送倒计时剩余描述
-            for (var i = 1; i < 10; i++) {
+            var reminderCount = Math.min(9, duration);
+            for (var i = 1; i <= reminderCount; i++) {
                 (function(j){
                     var timer = setTimeout(function() {
                         systemMessagesTextarea.value += ' ...' + j;
                         systemMessagesTextarea.scrollTop = systemMessagesTextarea.scrollHeight;
-                    }, (countdownsecond - i) * 1000);
+                    }, Math.max(0, (duration - j) * 1000));
                     countDowns.push(timer);
                 })(i);
             }
@@ -530,20 +547,20 @@
                 document.getElementById('startButton').disabled = true;
                 document.getElementById('countdownButton').disabled = true;
                 document.getElementById('endButton').disabled = false;
-            }, countdownsecond * 1000);
+            }, duration * 1000);
             countDowns.push(timer);
         }
 
 
         function endGame_() {
             // 把单词卡背面给显示出来
-            var backimgElement = document.getElementById('backimg');
-            backimgElement.src = "/static/image/" + imageThisRound + "_2." + ending;
+            if (imageThisRound != null) {
+                var backimgElement = document.getElementById('backimg');
+                backimgElement.src = "/static/image/" + imageThisRound + "_2." + ending;
+            }
 
             // 清空倒计时器
-            for (var i = 0; i < countDowns.length; i++) {
-                clearTimeout(countDowns[i]);
-            }
+            clearCountDowns();
             
         }
 
@@ -579,6 +596,9 @@
 
         function setCountDown() {
             var setCountDown = document.getElementById('setCountDown').value;
+            if (!/^\d+$/.test(setCountDown)) {
+                return;
+            }
             socket.emit('message_from_client','!!setCountDown ' + setCountDown);
         }
 
@@ -591,18 +611,13 @@
         }
 
         function resetAll() {
-            socket.emit('message_from_client','!!end');
-            socket.emit('message_from_client','!!end');
-            socket.emit('message_from_client','!!end');
             socket.emit('message_from_client','!!resetAll');
         }
 
         function resetAll_(){
             gamestatechange({type: 'end2'});
 
-            for (var i = 0; i < countDowns.length; i++) {
-                clearTimeout(countDowns[i]);
-            }
+            clearCountDowns();
 
             // 刷新页面
             location.reload();
@@ -619,9 +634,7 @@
             imgElement2.classList.remove('animate-in');
 
             // 删除倒计时器
-            for (var i = 0; i < countDowns.length; i++) {
-                clearTimeout(countDowns[i]);
-            }
+            clearCountDowns();
 
             // 单词卡翻回
             document.getElementById('card').classList.remove('flipped');
