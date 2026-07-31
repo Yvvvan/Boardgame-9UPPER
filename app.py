@@ -1,4 +1,5 @@
 import random
+import subprocess
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, disconnect
 import json
@@ -57,11 +58,12 @@ with open('static/data.json', 'r') as f:
     wordDataBaseFull = json.load(f)
 
 wordDataBase = list(wordDataBaseDefault)
+wordDataBaseMode = 'tutor'
 selectedWords = []
 
 
-def reset_game_state():
-    global smartPlayer, honestPlayer, startGame, selectedWord, endState, wordDataBase, countDownSecond, countDownEndsAt
+def reset_game_state(reset_settings=False):
+    global smartPlayer, honestPlayer, startGame, selectedWord, endState, wordDataBase, wordDataBaseMode, countDownSecond, countDownEndsAt
     clients.clear()
     connects.clear()
     players.clear()
@@ -71,10 +73,21 @@ def reset_game_state():
     honestPlayer = None
     selectedWord = None
     endState = 0
-    countDownSecond = 40
     countDownEndsAt = None
     selectedWords.clear()
-    wordDataBase = list(wordDataBaseDefault)
+    if reset_settings:
+        countDownSecond = 40
+        wordDataBase = list(wordDataBaseDefault)
+        wordDataBaseMode = 'tutor'
+
+
+def emit_current_settings(client_id):
+    emit('system_message', {
+        'type': 'settingsSync',
+        'message': None,
+        'countdown': countDownSecond,
+        'deck': wordDataBaseMode
+    }, room=client_id)
 
 
 def client_id_to_usename(client_id):
@@ -147,12 +160,79 @@ def number_players():
 
 def update_online_num():
     emit('system_state', {'type': None,
-                          'message': f'P/W/C:{len(players)}/{len(waits)}/{len(connects) - len(waits) - len(players)}'},
+                          'message': f'{len(players)}/{len(waits)}/{len(connects) - len(waits) - len(players)}'},
          broadcast=True)
+
+
+def get_git_version():
+    try:
+        return subprocess.check_output(
+            ['git', 'describe', '--tags', '--always', '--dirty'],
+            cwd=app.root_path,
+            text=True,
+            stderr=subprocess.DEVNULL,
+            timeout=2
+        ).strip()
+    except (subprocess.SubprocessError, FileNotFoundError):
+        return 'unknown'
+
+
+def login_client(username, reconnect_token=None):
+    client_id = request.sid
+    if not isinstance(username, str) or not username.strip():
+        emit('system_message', {'type': 'loginError', 'message': '用户名不能为空'}, room=client_id)
+        return
+
+    username = username.strip()
+    if username.startswith('!!'):
+        emit('system_message', {'type': 'loginError', 'message': '用户名格式无效'}, room=client_id)
+        return
+
+    if username not in clients:
+        clients[username] = {
+            'client_id': client_id,
+            'role': None,
+            'smartCnt': 0,
+            'reconnect_token': reconnect_token
+        }
+        emit('system_message', {'type': None, 'message': f'{username}已加入'}, broadcast=True)
+        emit('system_message', {'type': 'success', 'message': username}, room=client_id)
+        join(username)
+        return
+
+    user = clients[username]
+    old_client_id = user['client_id']
+    same_browser = (
+        reconnect_token
+        and user.get('reconnect_token')
+        and reconnect_token == user['reconnect_token']
+    )
+
+    if old_client_id is None or same_browser:
+        user['client_id'] = client_id
+        if reconnect_token:
+            user['reconnect_token'] = reconnect_token
+
+        if old_client_id and old_client_id != client_id:
+            if old_client_id in players:
+                players[players.index(old_client_id)] = client_id
+            if old_client_id in waits:
+                waits[waits.index(old_client_id)] = client_id
+            disconnect(old_client_id)
+
+        emit('system_message', {'type': None, 'message': f'{username}已重连'}, broadcast=True)
+        emit('system_message', {'type': 'success', 'message': username}, room=client_id)
+        reconnect(username)
+        return
+
+    emit('system_message', {
+        'type': 'loginError',
+        'message': f'{username}已被占用，请重新输入'
+    }, room=client_id)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', git_version=get_git_version())
 
 
 @socketio.on('connect')
@@ -162,6 +242,7 @@ def handle_connect():
     update_online_num()
 
     emit('system_message', {'type': 'handshake', 'message': '请输入一个用户名 \n(如果输入后没有收到 "登陆成功"，请刷新)'}, room=request.sid)
+    emit_current_settings(request.sid)
 
 
 @socketio.on('disconnect')
@@ -186,38 +267,47 @@ def handle_disconnect():
         reset_game_state()
 
 
+@socketio.on('login')
+def handle_login(data):
+    if current_username():
+        return
+    if not isinstance(data, dict):
+        reject('登录信息格式无效')
+        return
+    login_client(data.get('username'), data.get('token'))
+
+
+@socketio.on('logout')
+def handle_logout():
+    username = current_username()
+    if not username:
+        reject('当前没有登录用户名')
+        return
+    if startGame:
+        reject('游戏进行中不能退出用户名，请先结束本局')
+        return
+
+    clients.pop(username, None)
+    if request.sid in players:
+        players.remove(request.sid)
+    if request.sid in waits:
+        waits.remove(request.sid)
+    emit('system_message', {'type': 'loggedOut', 'message': None}, room=request.sid)
+    emit('system_message', {'type': None, 'message': f'{username}已退出用户名'}, broadcast=True)
+    update_online_num()
+
+
 @socketio.on('message_from_client')
 def handle_message(message):
-    global smartPlayer, honestPlayer, startGame, playerLimit, selectedWord, endState, selectedWords, wordDataBase, countDownSecond, countDownEndsAt
+    global smartPlayer, honestPlayer, startGame, playerLimit, selectedWord, endState, selectedWords, wordDataBase, wordDataBaseMode, countDownSecond, countDownEndsAt
 
     client_id = request.sid
     # print(f'Client ID: {client_id}, Message: {message}')
 
-    # 用户名处理， 第一条消息 (=当client_id 没有被记录时)
+    # 兼容旧客户端：第一条普通消息仍可作为用户名登录。
     if not client_id_to_usename(client_id):
-        userName = message
-        if userName.startswith('!!'):
-            emit('system_message', {'type': None, 'message': None}, room=client_id)
-            return
-        if userName not in clients:
-            clients[userName] = {'client_id': client_id, 'role': None, 'smartCnt':0}
-            emit('system_message', {'type': None, 'message': f'{userName}已加入'}, broadcast=True)
-            emit('system_message', {'type': "success", 'message': userName}, room=client_id)
-            join(userName)
-
-        elif userName in clients and clients[userName]['client_id'] is None:
-            clients[userName]['client_id'] = client_id
-            emit('system_message', {'type': None, 'message': f'{userName}已重连'}, broadcast=True)
-            emit('system_message', {'type': "success", 'message': userName}, room=client_id)
-            reconnect(userName)
-
-        elif userName in clients and clients[userName]['client_id'] is not None:
-            emit('system_message', {'type': None, 'message': f'{userName}已被占用，请重新输入'}, room=client_id)
-            return
-
-        else:
-            emit('system_message', {'type': None, 'message': '未知错误'}, room=client_id)
-            return
+        login_client(message)
+        return
 
     # 普通消息处理
     else:
@@ -282,12 +372,14 @@ def handle_message(message):
                 return
             elif message == '!!useFull' and not startGame:
                 wordDataBase = wordDataBaseFull.copy()
+                wordDataBaseMode = 'full'
                 selectedWords.clear()
                 emit('system_message', {'type': 'useFull',
                                         'message': f'词库已被 {username} 重置为 500全词库'}, broadcast=True)
                 return
             elif message == '!!useTutor' and not startGame:
                 wordDataBase = list(wordDataBaseDefault)
+                wordDataBaseMode = 'tutor'
                 selectedWords.clear()
                 emit('system_message', {'type': 'useTutor',
                                         'message': f'词库已被 {username} 重置为 教学词库'}, broadcast=True)
@@ -299,7 +391,7 @@ def handle_message(message):
                 emit('system_message', {'type': 'resetAll', 'message': '所有数据已被重置,请刷新页面后加入'}, broadcast=True)
                 for connect in connects.copy():
                     disconnect(connect)
-                reset_game_state()
+                reset_game_state(reset_settings=True)
                 return
             elif message == "!!skip" and startGame:
                 if not is_smart_player():
@@ -483,4 +575,9 @@ def join(userName):
 
 
 if __name__ == '__main__':
-    socketio.run(app, port=15672, allow_unsafe_werkzeug=True,debug=False)
+    socketio.run(
+        app,
+        port=11280,
+        allow_unsafe_werkzeug=True,
+        debug=True
+    )

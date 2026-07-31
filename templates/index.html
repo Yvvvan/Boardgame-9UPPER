@@ -40,7 +40,7 @@
 
         body {
             margin: 0;
-            padding: 88px 14px 218px;
+            padding: 88px 14px 110px;
             color: var(--ink);
             font-family: Arial, "Microsoft YaHei", sans-serif;
             background:
@@ -151,7 +151,7 @@
         }
 
         .animate-in {
-            animation: cardEnter 0.34s ease-out forwards;
+            animation: cardEnter 0.34s ease-out;
         }
 
         @keyframes cardEnter {
@@ -166,13 +166,16 @@
         }
 
         .gamecard {
+            position: relative;
+            width: 100%;
+            height: 100%;
             cursor: pointer;
             transform-style: preserve-3d;
             transition: transform 0.55s ease;
         }
 
         .gamecard.flipped {
-            transform: translate(-50%, -50%) rotateY(180deg);
+            transform: rotateY(180deg);
         }
 
         .front,
@@ -181,7 +184,9 @@
             width: 100%;
             height: 100%;
             position: absolute;
+            inset: 0;
             backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         .front img,
@@ -201,7 +206,8 @@
             z-index: 35;
             gap: 8px;
             width: min(620px, calc(100vw - 28px));
-            margin: 0 auto 112px;
+            bottom: 82px;
+            margin: 0 auto;
             padding: 10px;
             border: 1px solid var(--line);
             border-radius: 8px;
@@ -229,29 +235,49 @@
             padding-bottom: 0;
         }
 
-        .message-dock {
-            z-index: 34;
-            margin-bottom: 62px;
-        }
-
-        .composer-dock {
-            z-index: 36;
-            margin-bottom: 12px;
-        }
-
         .surface {
-            width: min(620px, calc(100vw - 28px));
+            width: 100%;
         }
 
         #systemMessages {
-            min-height: 88px;
-            max-height: 136px;
+            height: min(45vh, 320px);
+            min-height: 180px;
             color: #2d241f;
             border: 1px solid var(--line);
             border-radius: 8px;
             background: var(--panel);
             box-shadow: 0 12px 34px rgba(49, 28, 7, 0.18);
             resize: none;
+        }
+
+        .chat-launch {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 1030;
+            width: 52px;
+            height: 52px;
+            padding: 0;
+            border-radius: 999px;
+            box-shadow: var(--shadow);
+        }
+
+        .chat-launch svg {
+            width: 27px;
+            height: 27px;
+            stroke: currentColor;
+        }
+
+        .chat-unread {
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            width: 13px;
+            height: 13px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            background: var(--red);
+            box-shadow: 0 2px 6px rgba(33, 26, 22, 0.35);
         }
 
         .composer {
@@ -262,6 +288,20 @@
             border-radius: 8px;
             background: var(--panel);
             box-shadow: var(--shadow);
+        }
+
+        #chatModal .composer {
+            margin-top: 10px;
+            box-shadow: none;
+        }
+
+        .login-panel {
+            padding: 20px;
+        }
+
+        .login-panel .form-control {
+            min-height: 48px;
+            border-radius: 8px;
         }
 
         .composer input {
@@ -285,12 +325,112 @@
             border-bottom: 0;
         }
 
-        .modal-body {
-            line-height: 1.72;
+        .modal-close {
+            width: 34px;
+            height: 34px;
+            margin-left: auto;
+            padding: 0 0 3px;
+            color: #fff;
+            font-size: 27px;
+            font-weight: 900;
+            line-height: 1;
+            border: 2px solid #ff8a84;
+            border-radius: 50%;
+            background: var(--red);
         }
 
-        .modal-body img {
-            border-radius: 8px !important;
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #fff;
+            background: #b9221c;
+            border-color: #fff;
+        }
+
+        .countdown-display {
+            position: fixed;
+            top: 76px;
+            left: 50%;
+            z-index: 1040;
+            min-width: 88px;
+            padding: 8px 16px;
+            color: #fff;
+            font-size: 30px;
+            font-weight: 900;
+            line-height: 1;
+            text-align: center;
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            border-radius: 999px;
+            background: var(--red);
+            box-shadow: 0 8px 24px rgba(33, 26, 22, 0.3);
+            transform: translateX(-50%);
+        }
+
+        .countdown-display svg {
+            display: block;
+            width: 34px;
+            height: 34px;
+            margin: -2px auto;
+            stroke: currentColor;
+        }
+
+        .modal-body {
+            color: #443832;
+            line-height: 1.55;
+        }
+
+        .modal-lead {
+            margin-bottom: 14px;
+            padding: 12px 14px;
+            font-weight: 700;
+            border-left: 4px solid var(--orange);
+            border-radius: 6px;
+            background: #fff5df;
+        }
+
+        .info-grid,
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .info-item,
+        .role-item {
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #fffaf1;
+        }
+
+        .info-item strong,
+        .role-item strong {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--ink);
+        }
+
+        .modal-note {
+            margin: 14px 0 0;
+            color: #74665e;
+            font-size: 13px;
+        }
+
+        .rule-steps {
+            margin: 14px 0;
+            padding-left: 22px;
+        }
+
+        .rule-steps li {
+            margin-bottom: 8px;
+            padding-left: 3px;
+        }
+
+        .score-note {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #f3eee7;
+            font-size: 13px;
         }
 
         .hided {
@@ -315,13 +455,15 @@
             }
 
             .player-pill {
-                min-width: 66px;
+                min-width: 30px;
                 font-size: 10px;
             }
 
-            .control-button {
-                margin-bottom: 118px;
+            .info-grid,
+            .role-grid {
+                grid-template-columns: 1fr;
             }
+
         }
 
     </style>
@@ -331,7 +473,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top app-nav">
         <div class="container nav-shell">
             <!-- 网站名称 -->
-            <h1 class="navbar-brand mb-0 brand-title">瞎掰王 <span class="version-tag">v1.2.1</span></h1>
+            <h1 class="navbar-brand mb-0 brand-title">瞎掰王 <span class="version-tag">{{ git_version }}</span></h1>
 
             <!-- 信息小按钮 -->
             <button class="btn btn-outline-light nav-action" type="button" data-bs-toggle="modal" data-bs-target="#infoModal">说明</button>
@@ -339,66 +481,91 @@
             <button class="btn btn-warning nav-action hided" type="button" data-bs-toggle="modal" data-bs-target="#setModal" id="setButton">设定</button>
 
             <!-- 在线人数 -->
-            <p class="player-pill">在线人数<br><span id="playerNum">0/0/0</span></p>
+            <p class="player-pill">人数<br><span id="playerNum">0/0/0</span></p>
         </div>
     </nav>
 
+    <div id="countdownDisplay" class="countdown-display hided" role="timer" aria-live="polite">40</div>
+
+    <div class="modal fade" id="loginModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">加入游戏</h5>
+                </div>
+                <div class="modal-body login-panel">
+                    <p class="modal-lead">输入用户名，开始加入瞎掰王。</p>
+                    <input id="loginInput" type="text" class="form-control" maxlength="30" autocomplete="nickname" placeholder="请输入用户名">
+                    <button class="btn btn-primary w-100 mt-3" type="button" onclick="loginUsername()">进入游戏</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chatModalLabel">消息</h5>
+                    <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="关闭">×</button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="systemMessages" class="form-control surface" readonly></textarea>
+                    <div class="surface composer">
+                        <input id="messageInput" type="text" class="form-control" placeholder="请输入消息...">
+                        <button class="btn btn-primary" type="button" onclick="sendMessage()">发送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
+	      <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
           <!-- 模态框头部 -->
           <div class="modal-header">
             <h5 class="modal-title" id="infoModalLabel">说明</h5>
-              <p style="width: 10px;"></p>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="关闭">×</button>
           </div>
           <!-- 模态框内容 -->
-          <div class="modal-body">
-              1. 这是一个根据《瞎掰王》制作的demo游戏。目前有 4张教学卡片 或 500张游戏卡片，图片资源来自<a href="https://steamcommunity.com/sharedfiles/filedetails/?l=tchinese&id=3019326493">Steam创意工坊</a>。当所有卡片都被抽完时，系统会重复卡片。<br>
-              2. 目的是在和朋友出去玩的时候也能很方便的玩上一局，比如吃饭的时候。<br>
-              3. 最少游戏人数是3人，每张卡片有40秒的时间阅读/瞎编，在设置中改变倒计时时间。<br>
-              4. "大聪明"有游戏的开始结束控制权。在结束以后，大家都可以阅读卡片。<br>
-              5. 目前有一个消息窗口，也可以当聊天窗口用。<br>
-              6. 目前在测试阶段，只有一个房间(任何打开该网页的人都被连接到了同一个游戏房间)。在线人数P/W/C代表：正在游戏的人/等待游戏的人/还没设置用户名的人。<br>
-              7. 随便点点就知道该怎么用了。有问题，就刷新。还有问题，请去隔壁点击 重置房间 按钮。:)<br>
-              8. Bug反馈给<a href="https://github.com/Yvvvan/BullshitKing/issues">Yvan Github Repo</a>。<br>
-          </div>
-          <!-- 模态框底部 -->
-<!--          <div class="modal-footer">-->
-<!--            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>-->
-<!--          </div>-->
+	          <div class="modal-body">
+	              <p class="modal-lead">一款适合朋友聚会的在线瞎掰游戏：有人说真话，其余人现场编故事。</p>
+	              <div class="info-grid">
+	                  <div class="info-item"><strong>人数</strong>至少 3 人，建议 4 人以上。</div>
+	                  <div class="info-item"><strong>卡片</strong>4 张教学卡或 500 张完整卡。</div>
+	                  <div class="info-item"><strong>房间</strong>所有访问者进入同一个房间。</div>
+	                  <div class="info-item"><strong>消息</strong>点击“消息”按钮查看通知或聊天。</div>
+	              </div>
+	              <p class="modal-note">人数 P / W / C：游戏中 / 等待中 / 未登录。卡片图片来自 <a href="https://steamcommunity.com/sharedfiles/filedetails/?l=tchinese&id=3019326493">Steam 创意工坊</a> · <a href="https://github.com/Yvvvan/BullshitKing/issues">反馈问题</a></p>
+	          </div>
         </div>
       </div>
     </div>
 
     <div class="modal fade" id="ruleModal" tabindex="-1" aria-labelledby="ruleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+	        <div class="modal-dialog modal-dialog-scrollable">
           <div class="modal-content">
             <!-- 模态框头部 -->
             <div class="modal-header">
               <h5 class="modal-title" id="ruleModalLabel">规则</h5>
-                <p style="width: 10px;"></p>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="关闭">×</button>
             </div>
             <!-- 模态框内容 -->
-            <div class="modal-body">
-                1. 设置用户名登陆<br>
-                2. 等人到齐后(至少三人，推荐四人以上游玩)，可以用 [设定] 设置倒计时时间，卡组等等。<br>
-                3. 任意玩家点击 [开始游戏] 开始发身份牌("大聪明"、"瞎掰人"、"老实人")。"大聪明"点击 [发牌] 开始发单词卡。单词卡发出以后会有倒计时。在倒计时内"老实人"可以点击卡片,看到背面的内容；"瞎掰人"只能看到正面的内容，点击无效，需要在规定时间内瞎掰一个内容。<br>
-                4. 在倒计时结束后，卡片将不在可以翻转。"大聪明"选择任意发言者，开始听故事。"老实人"只需诚实地说出故事。"瞎掰人"需要以假乱真编出合适的故事。如果故事过于瞎掰，"聪明人"可以选择打断并发出"净ta喵扯淡"警告(只可警告当前的发言者)。在听完所有故事后，所有发言者可以相互质问。"大聪明"需要指认"老实人"。<br>
-                5. 在指认后，大家公布自己的身份。<br>
-                5.1 如果指认"老实人"成功，"大聪明"和"老实人"各获得X分(卡片上的难度分)。<br>
-                5.2 如果指认失败，则被指认地"瞎掰人"获得X分。<br>
-                5.3 如果警告牌发给了"瞎掰人"，被警告的瞎掰人会扣1分，"大聪明"获得1分。<br>
-                5.4 如果警告牌发给了"老实人"，"大聪明"会扣3分。<br>
-                6. "大聪明"点击 [结束游戏]，结束本局游戏，这时所有玩家可以查看卡片背面信息。再次点击 [结束游戏] 回收所有卡片和身份牌。<br>
-                7. 玩家会轮流担任"大聪明"。<br>
-                <img src="{{ url_for('static', filename='gamescreenshot.png') }}" class="" alt="screenshot" style="height: auto; width: 100%; border-radius: 30px;">
-            </div>
-            <!-- 模态框底部 -->
-  <!--          <div class="modal-footer">-->
-  <!--            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>-->
-  <!--          </div>-->
+	            <div class="modal-body">
+	                <div class="role-grid">
+	                    <div class="role-item"><strong>大聪明</strong>控制发牌并找出老实人。</div>
+	                    <div class="role-item"><strong>老实人</strong>翻到背面，按卡片讲真故事。</div>
+	                    <div class="role-item"><strong>瞎掰人</strong>只看正面，现场编出可信故事。</div>
+	                </div>
+	                <ol class="rule-steps">
+	                    <li>输入用户名；满 3 人后点击“开始游戏”。</li>
+	                    <li>大聪明点击“发牌开始”。倒计时内阅读或构思。</li>
+	                    <li>玩家轮流讲故事，大聪明可以质疑并最终指认老实人。</li>
+	                    <li>第一次点击“结束游戏”公开答案；第二次点击收回卡片，进入下一局。</li>
+	                </ol>
+	                <div class="score-note"><strong>计分：</strong>猜中时大聪明与老实人得卡片难度分；猜错时被指认的瞎掰人得分。错误质疑老实人扣 3 分，成功质疑瞎掰人则大聪明得 1 分、对方扣 1 分。</div>
+	            </div>
           </div>
         </div>
       </div>
@@ -409,8 +576,7 @@
             <!-- 模态框头部 -->
             <div class="modal-header">
               <h5 class="modal-title" id="setModalLabel">设定</h5>
-                <p style="width: 10px;"></p>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="关闭">×</button>
             </div>
             <!-- 模态框内容 -->
             <div class="modal-body">
@@ -422,10 +588,11 @@
 
                 <!-- 说明 -->
                 <p>游戏修改(仅在游戏未开始前可操作):</p>
+                <p id="settingsSummary" class="small text-muted">当前设定：40 秒，教学卡片</p>
 
                 <div class="input-group mb-3">
                   <span class="input-group-text" id="basic-addon1">倒计时</span>
-                  <input type="text" class="form-control" placeholder="默认40秒,在人到齐后更改!" aria-label="Username" aria-describedby="basic-addon1" id="setCountDown">
+                  <input type="text" class="form-control" value="40" aria-label="倒计时秒数" aria-describedby="basic-addon1" id="setCountDown">
                   <button class="btn btn-primary" type="button" onclick="setCountDown()">设定</button>
                 </div>
 
@@ -445,8 +612,10 @@
                     <span style="width: 10px;"></span>
                     <button class="btn btn-danger" type="button" onclick="resetAll()">强制初始化</button>
                 </div>
-
-                
+                <hr>
+                <div class="text-center">
+                    <button class="btn btn-outline-danger" type="button" onclick="logoutUsername()">退出用户名</button>
+                </div>
             </div>
             <!-- 模态框底部 -->
   <!--          <div class="modal-footer">-->
@@ -462,8 +631,8 @@
         </div>
     </main>
 
-    <div class="card-entry" id="card-container">
-        <div class="gamecard img-fluid2" id="card">
+    <div class="card-entry img-fluid2" id="card-container">
+        <div class="gamecard" id="card">
             <div class="front">
                 <img id="frontimg" src="{{ url_for('static', filename='image/a_example_1_1.png') }}" alt="Front Image" style="height: auto; width: 95vw; border-radius: 30px;">
             </div>
@@ -480,26 +649,33 @@
         <button class="btn btn-danger" onclick="endGame()" id="endButton">结束游戏</button>
     </div>
 
-    <!-- 系统消息 -->
-    <div class="fixed-bottom d-flex justify-content-center message-dock">
-        <textarea id="systemMessages" class="form-control surface" rows="3" readonly></textarea>
-    </div>
-
-    <!-- 输入框和发送按钮 -->
-    <div class="fixed-bottom d-flex justify-content-center composer-dock">
-        <div class="surface composer">
-            <input id="messageInput" type="text" class="form-control" placeholder="请输入用户名...">
-            <button class="btn btn-primary" onclick="sendMessage()">发送</button>
-        </div>
-    </div>
+    <button id="chatButton" class="btn btn-dark chat-launch hided" type="button" data-bs-toggle="modal" data-bs-target="#chatModal" aria-label="打开消息" title="消息">
+        <span id="chatUnread" class="chat-unread hided" aria-hidden="true"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M3 20l1.3 -3.9a9 8 0 1 1 3.4 2.9l-4.7 1"/>
+            <path d="M8 12l.01 0"/><path d="M12 12l.01 0"/><path d="M16 12l.01 0"/>
+        </svg>
+    </button>
 
     <script type="text/javascript">
 
         var playerRole = null;
         var imageThisRound = null;
         var countdownsecond = 40;
+        var currentDeck = 'tutor';
         var ending = 'png';
         var countDowns = [];
+        var countdownTicker = null;
+        var loggedIn = false;
+        var savedUsername = localStorage.getItem('bullshitKingUsername');
+        var reconnectToken = localStorage.getItem('bullshitKingReconnectToken');
+        if (!reconnectToken) {
+            reconnectToken = window.crypto && window.crypto.randomUUID
+                ? window.crypto.randomUUID()
+                : Date.now().toString(36) + Math.random().toString(36).slice(2);
+            localStorage.setItem('bullshitKingReconnectToken', reconnectToken);
+        }
 
         document.getElementById('card').addEventListener('click', function() {
             this.classList.toggle('flipped');
@@ -520,6 +696,11 @@
 
         socket.on('connect', function() {
             console.log('Connected to the server');
+            if (savedUsername) {
+                socket.emit('login', {username: savedUsername, token: reconnectToken});
+            } else {
+                showLoginModal();
+            }
         });
 
         socket.on('system_message', function(data) {
@@ -529,28 +710,62 @@
             if (data.type == 'handshake') {
                 systemMessagesTextarea.value = '';
                 systemMessagesTextarea.scrollTop = systemMessagesTextarea.scrollHeight;
+                if (!savedUsername) {
+                    showLoginModal();
+                }
             }
             // 设定用户名后
             if (data.type == 'success') {
                 console.log('success');
+                loggedIn = true;
+                savedUsername = data.message;
+                localStorage.setItem('bullshitKingUsername', savedUsername);
                 document.getElementById('messageInput').placeholder = '请输入消息...';
                 document.getElementById('control-button').classList.remove('hided');
                 document.getElementById('setButton').classList.remove('hided');
+                document.getElementById('chatButton').classList.remove('hided');
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('loginModal')).hide();
                 var systemMessagesTextarea = document.getElementById('systemMessages');
                 systemMessagesTextarea.value += '\n' + '系统消息: 登录成功， 用户名: ' + data.message;
                 // systemMessagesTextarea.value += '\n' + '系统消息: 如果没有看到 蓝、绿、红 三个按钮，请刷新页面！！';
                 systemMessagesTextarea.scrollTop = systemMessagesTextarea.scrollHeight;
                 return;
             }
+            if (data.type == 'loginError') {
+                localStorage.removeItem('bullshitKingUsername');
+                savedUsername = null;
+                loggedIn = false;
+                document.getElementById('loginInput').value = '';
+                document.getElementById('loginInput').placeholder = data.message;
+                showLoginModal();
+                return;
+            }
+            if (data.type == 'loggedOut') {
+                localStorage.removeItem('bullshitKingUsername');
+                savedUsername = null;
+                loggedIn = false;
+                location.reload();
+                return;
+            }
             // 设定倒计时
             if (data.type == 'settingCountDown') {
                 countdownsecond = Number(data.value);
+                updateSettingsDisplay();
             }
             if (data.type == 'useFull') {
                 ending = 'png';
+                currentDeck = 'full';
+                updateSettingsDisplay();
             }
             if (data.type == 'useTutor') {
                 ending = 'png';
+                currentDeck = 'tutor';
+                updateSettingsDisplay();
+            }
+            if (data.type == 'settingsSync') {
+                countdownsecond = Number(data.countdown);
+                currentDeck = data.deck;
+                updateSettingsDisplay();
             }
             if (data.type == 'resetAll') {
                 resetAll_();
@@ -572,6 +787,11 @@
             var systemMessagesTextarea = document.getElementById('systemMessages');
             systemMessagesTextarea.value += '\n' + data.username+': ' + data.message;
             systemMessagesTextarea.scrollTop = systemMessagesTextarea.scrollHeight;
+            var chatIsOpen = document.getElementById('chatModal').classList.contains('show');
+            if (data.username !== savedUsername && !chatIsOpen) {
+                document.getElementById('chatUnread').classList.remove('hided');
+                document.getElementById('chatButton').setAttribute('aria-label', '打开消息，有未读消息');
+            }
         });
 
 
@@ -699,9 +919,26 @@
 
         function sendMessage() {
             var messageInput = document.getElementById('messageInput');
-            var message = messageInput.value;
+            var message = messageInput.value.trim();
+            if (!message) {
+                return;
+            }
             socket.emit('message_from_client', message);
             messageInput.value = ''; // 清空输入框
+        }
+
+        function showLoginModal() {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('loginModal')).show();
+        }
+
+        function loginUsername() {
+            var loginInput = document.getElementById('loginInput');
+            var username = loginInput.value.trim();
+            if (!username) {
+                loginInput.focus();
+                return;
+            }
+            socket.emit('login', {username: username, token: reconnectToken});
         }
 
         function startGame() {
@@ -721,6 +958,11 @@
                 clearTimeout(countDowns[i]);
             }
             countDowns = [];
+            if (countdownTicker != null) {
+                clearInterval(countdownTicker);
+                countdownTicker = null;
+            }
+            document.getElementById('countdownDisplay').classList.add('hided');
         }
 
         function countDown_(remainingSeconds) {
@@ -730,6 +972,17 @@
                 duration = countdownsecond;
             }
             duration = Math.max(1, Math.floor(duration));
+
+            var countdownDisplay = document.getElementById('countdownDisplay');
+            var countdownEndsAt = Date.now() + duration * 1000;
+            countdownDisplay.removeAttribute('aria-label');
+            function updateCountdownDisplay() {
+                var secondsLeft = Math.max(0, Math.ceil((countdownEndsAt - Date.now()) / 1000));
+                countdownDisplay.textContent = secondsLeft;
+            }
+            updateCountdownDisplay();
+            countdownDisplay.classList.remove('hided');
+            countdownTicker = setInterval(updateCountdownDisplay, 250);
 
             var showTimer = setTimeout(function() {
                 var imgElement2 = document.querySelector('.img-fluid2');
@@ -759,6 +1012,18 @@
                 var frontimgElement = document.getElementById('frontimg');
                 var backimgElement = document.getElementById('backimg');
                 backimgElement.src = frontimgElement.src;
+                if (countdownTicker != null) {
+                    clearInterval(countdownTicker);
+                    countdownTicker = null;
+                }
+                countdownDisplay.setAttribute('aria-label', '倒计时结束');
+                countdownDisplay.innerHTML =
+                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"' +
+                    ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+                    '<path stroke="none" d="M0 0h24v24H0z" fill="none"/>' +
+                    '<path d="M12 13m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>' +
+                    '<path d="M12 10l0 3l2 0"/><path d="M7 4l-2.75 2"/>' +
+                    '<path d="M17 4l2.75 2"/></svg>';
                 systemMessagesTextarea.value += '\n... 倒计时结束 ...' ;
                 systemMessagesTextarea.scrollTop = systemMessagesTextarea.scrollHeight;
                 document.getElementById('startButton').disabled = true;
@@ -819,6 +1084,13 @@
             socket.emit('message_from_client','!!setCountDown ' + setCountDown);
         }
 
+        function updateSettingsDisplay() {
+            document.getElementById('setCountDown').value = countdownsecond;
+            var deckLabel = currentDeck == 'full' ? '500 张完整卡片' : '教学卡片';
+            document.getElementById('settingsSummary').textContent =
+                '当前设定：' + countdownsecond + ' 秒，' + deckLabel;
+        }
+
         function useFull() {
             socket.emit('message_from_client','!!useFull');
         }
@@ -829,6 +1101,10 @@
 
         function resetAll() {
             socket.emit('message_from_client','!!resetAll');
+        }
+
+        function logoutUsername() {
+            socket.emit('logout');
         }
 
         function resetAll_(){
@@ -856,6 +1132,26 @@
             // 单词卡翻回
             document.getElementById('card').classList.remove('flipped');
         }
+
+        document.getElementById('loginInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                loginUsername();
+            }
+        });
+
+        document.getElementById('messageInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        document.getElementById('chatModal').addEventListener('shown.bs.modal', function() {
+            var messages = document.getElementById('systemMessages');
+            messages.scrollTop = messages.scrollHeight;
+            document.getElementById('chatUnread').classList.add('hided');
+            document.getElementById('chatButton').setAttribute('aria-label', '打开消息');
+            document.getElementById('messageInput').focus();
+        });
     </script>
 </body>
 </html>
